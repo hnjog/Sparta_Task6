@@ -14,4 +14,7 @@ class TASK6_API ATaskGameMode : public AGameMode
 {
 	GENERATED_BODY()
 	
+public:
+	ATaskGameMode();
+
 };

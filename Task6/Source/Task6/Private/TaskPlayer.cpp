@@ -15,10 +15,12 @@ ATaskPlayer::ATaskPlayer()
 	SpringArmComp->SetupAttachment(RootComponent);
 	SpringArmComp->TargetArmLength = 300.0f;
 	SpringArmComp->bUsePawnControlRotation = true;
+	SpringArmComp->TargetOffset.Set(0.0, 0.0, 150.0);
 
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
 	CameraComp->bUsePawnControlRotation = false;
+	CameraComp->SetRelativeRotation(FRotator(-20.0f, 0.0f, 0.0f));
 
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> MeshAsset(TEXT("/Game/Resource/Robot_scout_R_21/Mesh/SK_Robot_scout_R21.SK_Robot_scout_R21"));
 	if (MeshAsset.Succeeded())
@@ -36,8 +38,6 @@ ATaskPlayer::ATaskPlayer()
 			GetMesh()->SetAnimInstanceClass(MeshAnimAsset.Class);
 		}
 	}
-
-	
 }
 
 // Called when the game starts or when spawned

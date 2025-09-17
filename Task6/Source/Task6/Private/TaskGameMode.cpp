@@ -2,4 +2,9 @@
 
 
 #include "TaskGameMode.h"
+#include "TaskPlayer.h"
 
+ATaskGameMode::ATaskGameMode()
+{
+	DefaultPawnClass = ATaskPlayer::StaticClass();
+}
