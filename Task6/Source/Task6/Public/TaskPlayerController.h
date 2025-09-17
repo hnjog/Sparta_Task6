@@ -22,6 +22,11 @@ public:
 
 	virtual void BeginPlay() override;
 
+	UInputAction* GetMoveAction() const { return MoveAction; }
+	UInputAction* GetJumpAction() const { return JumpAction; }
+	UInputAction* GetLookAction() const { return LookAction; }
+	UInputAction* GetSprintAction() const { return SprintAction; }
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	TObjectPtr<UInputMappingContext> InputMappingContext;

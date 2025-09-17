@@ -4,12 +4,15 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Animation/AnimInstance.h"
+#include "EnhancedInputComponent.h"
+#include "TaskPlayerController.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 ATaskPlayer::ATaskPlayer()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = false;
 
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArmComp->SetupAttachment(RootComponent);
@@ -38,13 +41,19 @@ ATaskPlayer::ATaskPlayer()
 			GetMesh()->SetAnimInstanceClass(MeshAnimAsset.Class);
 		}
 	}
+
+	NormalSpeed = 600.0f;
+	SprintSpeedMultiplier = 1.5f;
+	SprintSpeed = NormalSpeed * SprintSpeedMultiplier;
+
+	GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
 }
 
 // Called when the game starts or when spawned
 void ATaskPlayer::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 // Called every frame
@@ -54,10 +63,136 @@ void ATaskPlayer::Tick(float DeltaTime)
 
 }
 
-// Called to bind functionality to input
 void ATaskPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	// Enhanced InputComponent로 캐스팅
+	if (UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		// IA를 가져오기 위해 현재 소유 중인 Controller를 ASpartaPlayerController로 캐스팅
+		if (ATaskPlayerController* PlayerController = Cast<ATaskPlayerController>(GetController()))
+		{
+			if (UInputAction* MoveAction = PlayerController->GetMoveAction())
+			{
+				// IA_Move 액션 키를 "키를 누르고 있는 동안" Move() 호출
+				EnhancedInput->BindAction(
+					MoveAction,
+					ETriggerEvent::Triggered,
+					this,
+					&ATaskPlayer::Move
+				);
+			}
+
+			if (UInputAction* JumpAction = PlayerController->GetJumpAction())
+			{
+				// IA_Jump 액션 키를 "키를 누르고 있는 동안" StartJump() 호출
+				EnhancedInput->BindAction(
+					JumpAction,
+					ETriggerEvent::Triggered,
+					this,
+					&ATaskPlayer::StartJump
+				);
+
+				// IA_Jump 액션 키에서 "손을 뗀 순간" StopJump() 호출
+				EnhancedInput->BindAction(
+					JumpAction,
+					ETriggerEvent::Completed,
+					this,
+					&ATaskPlayer::StopJump
+				);
+			}
+
+			if (UInputAction* LookAction = PlayerController->GetLookAction())
+			{
+				// IA_Look 액션 마우스가 "움직일 때" Look() 호출
+				EnhancedInput->BindAction(
+					LookAction,
+					ETriggerEvent::Triggered,
+					this,
+					&ATaskPlayer::Look
+				);
+			}
+
+			if (UInputAction* SprintAction = PlayerController->GetSprintAction())
+			{
+				// IA_Sprint 액션 키를 "누르고 있는 동안" StartSprint() 호출
+				EnhancedInput->BindAction(
+					SprintAction,
+					ETriggerEvent::Triggered,
+					this,
+					&ATaskPlayer::StartSprint
+				);
+				// IA_Sprint 액션 키에서 "손을 뗀 순간" StopSprint() 호출
+				EnhancedInput->BindAction(
+					SprintAction,
+					ETriggerEvent::Completed,
+					this,
+					&ATaskPlayer::StopSprint
+				);
+			}
+		}
+	}
 }
 
+void ATaskPlayer::Move(const FInputActionValue& value)
+{
+	if (Controller == nullptr)
+		return;
+
+	const FVector2D MoveValue = value.Get<FVector2D>();
+
+	if (FMath::IsNearlyZero(MoveValue.Y) == false)
+	{
+		AddMovementInput(GetActorRightVector(), MoveValue.Y);
+	}
+
+	if (FMath::IsNearlyZero(MoveValue.X) == false)
+	{
+		AddMovementInput(GetActorForwardVector(), MoveValue.X);
+	}
+}
+
+void ATaskPlayer::StartJump(const FInputActionValue& value)
+{
+	if (value.Get<bool>() == true)
+	{
+		Jump();
+	}
+}
+
+void ATaskPlayer::StopJump(const FInputActionValue& value)
+{
+	if (value.Get<bool>() == false)
+	{
+		StopJumping();
+	}
+}
+
+void ATaskPlayer::Look(const FInputActionValue& value)
+{
+	FVector2D LookInput = value.Get<FVector2D>();
+
+	// X는 좌우 회전 (Yaw), Y는 상하 회전 (Pitch)
+	
+	// 좌우 회전
+	AddControllerYawInput(LookInput.X);
+	// 상하 회전
+	AddControllerPitchInput(LookInput.Y);
+}
+
+void ATaskPlayer::StartSprint(const FInputActionValue& value)
+{
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+	}
+}
+
+void ATaskPlayer::StopSprint(const FInputActionValue& value)
+{
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
+	}
+}
