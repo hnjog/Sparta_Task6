@@ -3,8 +3,10 @@
 
 #include "TaskGameMode.h"
 #include "TaskPlayer.h"
+#include "TaskPlayerController.h"
 
 ATaskGameMode::ATaskGameMode()
 {
 	DefaultPawnClass = ATaskPlayer::StaticClass();
+	PlayerControllerClass = ATaskPlayerController::StaticClass();
 }
