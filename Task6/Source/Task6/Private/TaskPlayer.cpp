@@ -7,6 +7,7 @@
 #include "EnhancedInputComponent.h"
 #include "TaskPlayerController.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 ATaskPlayer::ATaskPlayer()
@@ -46,7 +47,11 @@ ATaskPlayer::ATaskPlayer()
 	SprintSpeedMultiplier = 1.5f;
 	SprintSpeed = NormalSpeed * SprintSpeedMultiplier;
 
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationPitch = false;
+
 	GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
 // Called when the game starts or when spawned
@@ -142,14 +147,20 @@ void ATaskPlayer::Move(const FInputActionValue& value)
 
 	const FVector2D MoveValue = value.Get<FVector2D>();
 
-	if (FMath::IsNearlyZero(MoveValue.Y) == false)
-	{
-		AddMovementInput(GetActorRightVector(), MoveValue.Y);
-	}
+	const float YValue = GetControlRotation().Yaw;
+	const FRotator YawRot(0.f, YValue, 0.f);
 
 	if (FMath::IsNearlyZero(MoveValue.X) == false)
 	{
-		AddMovementInput(GetActorForwardVector(), MoveValue.X);
+		//FVector Right = RootComponent->GetRightVector() 
+		const FVector Forward = FRotationMatrix(YawRot).GetUnitAxis(EAxis::X);
+		AddMovementInput(Forward, MoveValue.X);
+	}
+
+	if (FMath::IsNearlyZero(MoveValue.Y) == false)
+	{
+		const FVector Right = FRotationMatrix(YawRot).GetUnitAxis(EAxis::Y);
+		AddMovementInput(Right, MoveValue.Y);
 	}
 }
 
