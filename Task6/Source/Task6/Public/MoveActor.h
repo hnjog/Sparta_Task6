@@ -18,6 +18,11 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float deltaTime) override;
 
+	FORCEINLINE void SetMoveSpeed(float moveSpeed) { MoveSpeed = moveSpeed; }
+	FORCEINLINE void SetMoveDistance(float moveDistance) { MoveDistance = moveDistance; }
+	FORCEINLINE void MoveHorizontal() { bMoveY = false; }
+	FORCEINLINE void MoveVertical() { bMoveY = true; }
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> StaticMeshComp;

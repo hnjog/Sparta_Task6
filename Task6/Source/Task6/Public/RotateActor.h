@@ -17,6 +17,8 @@ public:
 
 	virtual void Tick(float deltaTime) override;
 
+	FORCEINLINE void SetRotateSpeed(float rotateSpeed) { RotateSpeed = rotateSpeed; }
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> StaticMeshComp;
