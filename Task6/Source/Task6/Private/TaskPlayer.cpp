@@ -47,10 +47,12 @@ ATaskPlayer::ATaskPlayer()
 	NormalSpeed = 600.0f;
 	SprintSpeedMultiplier = 1.5f;
 	SprintSpeed = NormalSpeed * SprintSpeedMultiplier;
+	DashSpeed = 1000.0f;
 
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationPitch = false;
 
+	JumpMaxCount = 2;
 	GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->JumpZVelocity = 900.0f;
@@ -165,7 +167,6 @@ void ATaskPlayer::Move(const FInputActionValue& value)
 
 	if (FMath::IsNearlyZero(MoveValue.X) == false)
 	{
-		//FVector Right = RootComponent->GetRightVector() 
 		const FVector Forward = FRotationMatrix(YawRot).GetUnitAxis(EAxis::X);
 		AddMovementInput(Forward, MoveValue.X);
 	}
@@ -182,6 +183,14 @@ void ATaskPlayer::StartJump(const FInputActionValue& value)
 	if (value.Get<bool>() == true)
 	{
 		Jump();
+
+		if (GetCharacterMovement()->IsFalling() &&
+			bDashCheck == false)
+		{
+			bDashCheck = true;
+			const FVector Forward = (GetActorForwardVector() + GetActorUpVector()).GetSafeNormal() * DashSpeed;
+			LaunchCharacter(Forward, true, false);
+		}
 	}
 }
 
@@ -225,4 +234,10 @@ void ATaskPlayer::RestartGame(const FInputActionValue& value)
 {
 	// 현재 레벨 재시작
 	UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()));
+}
+
+void ATaskPlayer::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+	bDashCheck = false;
 }

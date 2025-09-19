@@ -47,6 +47,8 @@ public:
 	UFUNCTION()
 	void RestartGame(const FInputActionValue& value);
 
+	virtual void Landed(const FHitResult& Hit) override;
+
 protected:
 	// 스프링 암 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
@@ -61,4 +63,9 @@ protected:
 	float SprintSpeedMultiplier;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
 	float SprintSpeed;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
+	float DashSpeed;
+
+	bool bDashCheck;
 };
