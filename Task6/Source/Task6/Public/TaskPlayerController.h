@@ -26,6 +26,7 @@ public:
 	UInputAction* GetJumpAction() const { return JumpAction; }
 	UInputAction* GetLookAction() const { return LookAction; }
 	UInputAction* GetSprintAction() const { return SprintAction; }
+	UInputAction* GetRestartAction() const { return RestartAction; }
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
@@ -43,4 +44,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	TObjectPtr<UInputAction> SprintAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	TObjectPtr<UInputAction> RestartAction;
 };

@@ -9,7 +9,8 @@ ATaskPlayerController::ATaskPlayerController()
 	MoveAction(nullptr),
 	JumpAction(nullptr),
 	LookAction(nullptr),
-	SprintAction(nullptr)
+	SprintAction(nullptr),
+	RestartAction(nullptr)
 {
 }
 

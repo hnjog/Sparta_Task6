@@ -44,6 +44,9 @@ public:
 	UFUNCTION()
 	void StopSprint(const FInputActionValue& value);
 
+	UFUNCTION()
+	void RestartGame(const FInputActionValue& value);
+
 protected:
 	// 스프링 암 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")

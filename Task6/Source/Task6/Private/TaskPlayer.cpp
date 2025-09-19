@@ -8,6 +8,7 @@
 #include "TaskPlayerController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ATaskPlayer::ATaskPlayer()
@@ -52,6 +53,7 @@ ATaskPlayer::ATaskPlayer()
 
 	GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->JumpZVelocity = 900.0f;
 }
 
 // Called when the game starts or when spawned
@@ -136,6 +138,17 @@ void ATaskPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 					&ATaskPlayer::StopSprint
 				);
 			}
+
+			if (UInputAction* RestartAction = PlayerController->GetRestartAction())
+			{
+				// IA_Look 액션 마우스가 "움직일 때" Look() 호출
+				EnhancedInput->BindAction(
+					RestartAction,
+					ETriggerEvent::Triggered,
+					this,
+					&ATaskPlayer::RestartGame
+				);
+			}
 		}
 	}
 }
@@ -206,4 +219,10 @@ void ATaskPlayer::StopSprint(const FInputActionValue& value)
 	{
 		GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
 	}
+}
+
+void ATaskPlayer::RestartGame(const FInputActionValue& value)
+{
+	// 현재 레벨 재시작
+	UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()));
 }
